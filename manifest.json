@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.7.2",
+  "version": "1.8.5",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
 
@@ -94,7 +94,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/chatgpt-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/chatgpt-save-button.css"],
       "run_at": "document_end",
@@ -109,7 +110,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/claude-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/claude-save-button.css"],
       "run_at": "document_end",
@@ -124,7 +126,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/gemini-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/gemini-save-button.css"],
       "run_at": "document_start",
@@ -140,7 +143,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/grok-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/grok-save-button.css"],
       "run_at": "document_start",
@@ -156,7 +160,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/deepseek-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/deepseek-save-button.css"],
       "run_at": "document_start",
@@ -170,7 +175,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/perplexity-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/perplexity-save-button.css"],
       "run_at": "document_end",
@@ -185,7 +191,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/google-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/google-save-button.css"],
       "run_at": "document_end",
@@ -200,7 +207,8 @@
         "content-scripts/conversation-extractor-utils.js",
         "content-scripts/language-detector.js",
         "content-scripts/copilot-history-extractor.js",
-        "content-scripts/focus-toggle.js"
+        "content-scripts/focus-toggle.js",
+        "content-scripts/sidebar-session-bridge.js"
       ],
       "css": ["content-scripts/copilot-save-button.css"],
       "run_at": "document_end",

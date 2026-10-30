@@ -1,3 +1,4 @@
+import { BrowserSessions } from '../modules/browser-sessions.js';
 import { PROVIDERS, getProviderById, getProviderByIdWithSettings, getEnabledProviders } from '../modules/providers.js';
 import { applyTheme } from '../modules/theme-manager.js';
 import { t, translatePage, initializeLanguage } from '../modules/i18n.js';
@@ -31,8 +32,9 @@ import {
 } from '../modules/history-manager.js';
 
 let currentProvider = null;
-const loadedIframes = new Map();  // providerId -> iframe element
-const loadedIframesState = new Map();  // providerId -> 'loading' | 'ready'
+let browserSessions;
+let loadedIframes = new Map();  // providerId -> iframe element
+let loadedIframesState = new Map();  // providerId -> 'loading' | 'ready'
 let currentView = 'providers';  // 'providers', 'prompt-library', or 'chat-history'
 let currentEditingPromptId = null;
 let currentInsertPromptId = null;  // T071: For insert prompt modal
@@ -62,7 +64,33 @@ async function init() {
   await initializeLanguage();  // Initialize i18n
   translatePage();  // Translate all static text
   await renderProviderTabs();
+  browserSessions = new BrowserSessions({
+    snapshot: () => ({ provider: currentProvider, view: currentView,
+      workspace: document.getElementById('prompt-workspace-text').value,
+      workspaceProvider: selectedWorkspaceProvider }),
+    restore: async (session, frames) => {
+      loadedIframes = frames.iframes;
+      loadedIframesState = frames.states;
+      currentProvider = null;
+      selectedWorkspaceProvider = session.workspaceProvider;
+      document.getElementById('prompt-workspace-text').value = session.workspace;
+      const view = session.view;
+      await loadDefaultProvider();
+      switchToView(view);
+    },
+    changed: () => {
+      const provider = getProviderById(currentProvider);
+      document.getElementById('page-send').textContent = provider ? `Send to ${provider.name}` : 'Send';
+    }
+  });
+  const frames = await browserSessions.start();
+  loadedIframes = frames.iframes;
+  loadedIframesState = frames.states;
+  selectedWorkspaceProvider = browserSessions.session.workspaceProvider;
+  document.getElementById('prompt-workspace-text').value = browserSessions.session.workspace;
+  const initialView = browserSessions.session.view;
   await loadDefaultProvider();
+  switchToView(initialView);
   setupMessageListener();
   setupPromptLibrary();  // T045: Initialize prompt library
   setupChatHistory();     // Initialize chat history
@@ -76,7 +104,8 @@ async function init() {
   // T070: Notify background when sidebar closes
   window.addEventListener('beforeunload', () => {
     try {
-      chrome.runtime.sendMessage({ action: 'sidePanelClosed', payload: {} });
+      browserSessions.capture();
+      chrome.runtime.sendMessage({ action: 'sidePanelClosed', payload: { windowId: browserSessions.windowId, tabId: browserSessions.tabId } });
     } catch (error) {
       // Ignore errors during unload
     }
@@ -245,6 +274,11 @@ async function switchProvider(providerId) {
   }
 
   currentProvider = providerId;
+  if (browserSessions) {
+    browserSessions.session.provider = providerId;
+    browserSessions.render();
+    browserSessions.save();
+  }
 
   // Save last selected provider
   await chrome.storage.sync.set({ lastSelectedProvider: providerId });
@@ -266,7 +300,8 @@ function createProviderIframe(provider) {
   const container = document.getElementById('provider-container');
   const iframe = document.createElement('iframe');
 
-  iframe.src = provider.url;
+  iframe.src = browserSessions ? browserSessions.register(provider, iframe) : provider.url;
+  const iframeStates = loadedIframesState;
   // Sandbox must allow same-origin + scripts so provider UIs can function; popups are
   // permitted to support OAuth flows within embedded sites. See README "Permissions"
   // for the full security rationale.
@@ -280,13 +315,13 @@ function createProviderIframe(provider) {
   iframe.addEventListener('load', () => {
     hideLoading();
     // Mark iframe as ready
-    loadedIframesState.set(provider.id, 'ready');
+    iframeStates.set(provider.id, 'ready');
   });
 
   iframe.addEventListener('error', () => {
     showError(`Failed to load ${provider.name}. Please try again or check your internet connection.`);
     // Mark as ready even on error to prevent infinite waiting
-    loadedIframesState.set(provider.id, 'ready');
+    iframeStates.set(provider.id, 'ready');
   });
 
   container.appendChild(iframe);
@@ -306,7 +341,9 @@ async function loadDefaultProvider() {
     ? (settings.lastSelectedProvider || settings.defaultProvider)
     : settings.defaultProvider;
 
-  await switchProvider(providerId);
+  const enabled = await getEnabledProviders();
+  const preferred = browserSessions?.session.provider || providerId;
+  await switchProvider(enabled.some(provider => provider.id === preferred) ? preferred : enabled[0]?.id);
 }
 
 // T018: Setup message listener
@@ -315,6 +352,14 @@ function setupMessageListener() {
     // Handle async operations properly
     (async () => {
       try {
+        if (message.payload?.sourceWindowId && message.payload.sourceWindowId !== browserSessions.windowId) {
+          sendResponse({ success: false });
+          return;
+        }
+        if (message.payload?.sourceTabId && message.payload.sourceTabId !== browserSessions.tabId) {
+          sendResponse({ success: false });
+          return;
+        }
         if (message.action === 'switchProvider') {
           await switchProvider(message.payload.providerId);
 
@@ -1390,7 +1435,9 @@ async function updateWorkspaceProviderSelector() {
   const useDarkIcons = isDarkTheme();
 
   // Set current provider as default if available
-  selectedWorkspaceProvider = currentProvider || enabledProviders[0]?.id || '';
+  if (!enabledProviders.some(provider => provider.id === selectedWorkspaceProvider)) {
+    selectedWorkspaceProvider = currentProvider || enabledProviders[0]?.id || '';
+  }
 
   // Update button icon
   const currentProviderData = enabledProviders.find(p => p.id === selectedWorkspaceProvider);
