@@ -2218,3 +2218,34 @@ a.conversation-link:hover {
   background: #4a3a00;
   color: #fbc02d;
 }
+
+/* Keep verification/login visible while offering recovery from a stalled frame. */
+.provider-recovery {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 1;
+  padding: 12px;
+  border: 1px solid #a1a1aa;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  box-shadow: 0 2px 8px #0002;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.provider-recovery[hidden] { display: none; }
+.provider-recovery p { margin-bottom: 8px; }
+.provider-recovery button {
+  padding: 6px 10px;
+  margin: 4px 8px 0 0;
+  cursor: pointer;
+}
+[data-theme="dark"] .provider-recovery {
+  background: #262626;
+  color: #eee;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] .provider-recovery { background: #262626; color: #eee; }
+}

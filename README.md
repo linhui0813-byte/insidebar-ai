@@ -2,7 +2,7 @@
 
 > Your AI command center: ChatGPT, Claude, Gemini, Google AI, Grok, and DeepSeek—all in one sidebar
 
-![Version](https://img.shields.io/badge/version-1.6.0-blue.svg)
+![Version](https://img.shields.io/badge/version-1.7.3-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Languages](https://img.shields.io/badge/languages-10-brightgreen.svg)
 
@@ -358,6 +358,11 @@ Click the puzzle piece icon in Chrome/Edge toolbar and pin "insidebar.ai" to mak
 2. The extension needs an active login session to work
 3. If still not working, try clearing your browser cache and cookies for that specific provider
 4. Some providers may have regional restrictions or require specific account types
+
+**ChatGPT stalls, shows verification, or stays blank** (#16)
+The sidebar checks for ChatGPT's chat input rather than treating a loaded frame as a working chat. If the input is still unavailable after 20 seconds, a recovery notice offers **Open ChatGPT in a tab** and **Retry**. Complete any sign-in or verification in the normal tab, then retry the sidebar. The notice disappears automatically if the chat input becomes available.
+
+This is a recovery path, not a guarantee that ChatGPT will permit embedding. In an isolated Chromium check, ChatGPT returned a Cloudflare verification page; the reporter's specific October 19 regression has not yet been confirmed. The `Blocked autofocusing` warning alone does not explain a page failing to render. If retry still fails, continue in the normal tab and report the visible error and browser version in [issue #16](https://github.com/xiaolai/insidebar-ai/issues/16). Do not include cookies, tokens, or conversation content.
 
 **Provider loads but shows login page**
 Your session may have expired. Open the provider in a regular tab, log in again, then refresh the sidebar.

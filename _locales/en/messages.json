@@ -1,4 +1,9 @@
 {
+  "chatgptRecoveryMessage": {
+    "message": "ChatGPT has not made its chat input available. Open it in a tab to sign in or complete verification, then retry here. Some browser or site restrictions may still prevent sidebar access."
+  },
+  "chatgptRecoveryRetry": { "message": "Retry" },
+  "chatgptRecoveryOpen": { "message": "Open ChatGPT in a tab" },
   "extensionName": {
     "message": "insidebar.ai"
   },

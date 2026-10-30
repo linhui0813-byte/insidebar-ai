@@ -1,3 +1,4 @@
+import { monitorChatGPTFrame } from '../modules/chatgpt-frame.js';
 import { PROVIDERS, getProviderById, getProviderByIdWithSettings, getEnabledProviders } from '../modules/providers.js';
 import { applyTheme } from '../modules/theme-manager.js';
 import { t, translatePage, initializeLanguage } from '../modules/i18n.js';
@@ -31,8 +32,9 @@ import {
 } from '../modules/history-manager.js';
 
 let currentProvider = null;
+let chatgptMonitor = null;
 const loadedIframes = new Map();  // providerId -> iframe element
-const loadedIframesState = new Map();  // providerId -> 'loading' | 'ready'
+const loadedIframesState = new Map();  // providerId -> 'loading' | 'ready' | 'failed'
 let currentView = 'providers';  // 'providers', 'prompt-library', or 'chat-history'
 let currentEditingPromptId = null;
 let currentInsertPromptId = null;  // T071: For insert prompt modal
@@ -245,6 +247,7 @@ async function switchProvider(providerId) {
   }
 
   currentProvider = providerId;
+  chatgptMonitor?.setActive(providerId === 'chatgpt');
 
   // Save last selected provider
   await chrome.storage.sync.set({ lastSelectedProvider: providerId });
@@ -277,16 +280,23 @@ function createProviderIframe(provider) {
   // Set initial state as loading
   loadedIframesState.set(provider.id, 'loading');
 
+  if (provider.id === 'chatgpt') {
+    chatgptMonitor = monitorChatGPTFrame(iframe, container, state => {
+      loadedIframesState.set(provider.id, state);
+    });
+  }
+
   iframe.addEventListener('load', () => {
     hideLoading();
     // Mark iframe as ready
-    loadedIframesState.set(provider.id, 'ready');
+    if (provider.id !== 'chatgpt') loadedIframesState.set(provider.id, 'ready');
   });
 
   iframe.addEventListener('error', () => {
+    if (provider.id === 'chatgpt') return; // The recovery notice supplies retry/tab actions.
     showError(`Failed to load ${provider.name}. Please try again or check your internet connection.`);
     // Mark as ready even on error to prevent infinite waiting
-    loadedIframesState.set(provider.id, 'ready');
+    if (provider.id !== 'chatgpt') loadedIframesState.set(provider.id, 'ready');
   });
 
   container.appendChild(iframe);
@@ -448,9 +458,12 @@ async function waitForIframeReady(providerId) {
   }
 
   // If loading, wait for load event
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    const deadline = Date.now() + 30000;
     const checkReady = () => {
-      if (loadedIframesState.get(providerId) === 'ready') {
+      if (loadedIframesState.get(providerId) === 'failed' || Date.now() >= deadline) {
+        reject(new Error(`${providerId} is not ready. Open it in a tab or retry the sidebar.`));
+      } else if (loadedIframesState.get(providerId) === 'ready') {
         resolve();
       } else {
         // Check again after a short delay
@@ -487,6 +500,7 @@ async function injectTextIntoProvider(providerId, text) {
     );
   } catch (error) {
     console.error('Error sending text injection message:', error);
+    throw error;
   }
 }
 

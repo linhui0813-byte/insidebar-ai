@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "__MSG_extensionName__",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "__MSG_extensionDescription__",
   "default_locale": "en",
 
@@ -85,6 +85,12 @@
 
 
   "content_scripts": [
+    {
+      "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
+      "js": ["content-scripts/chatgpt-frame-status.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    },
     {
       "matches": ["https://chatgpt.com/*", "https://chat.openai.com/*"],
       "js": [

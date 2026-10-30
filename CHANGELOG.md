@@ -7,7 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.3] - 2026-10-31
+
 ### Fixed
+- **ChatGPT Sidebar Recovery** (#16): A loaded challenge/error page is no longer treated as a ready chat
+  - Check for the chat input through a ChatGPT-only content script
+  - Offer Retry and Open ChatGPT in a tab after 20 seconds without an input, keeping the provider page visible
+  - Bound text-delivery waits and report readiness failures instead of claiming text was sent
+  - This mitigates stalled embedding; the reporter's October 19 root cause remains unconfirmed
 - **Prompt Genie Scrolling** (#13): Saved prompts were unreachable on shorter side panels
   - The prompt list only got the height left over below the workspace and quick-access panel, which was zero on panels below about 1000px tall
   - The whole Prompt Genie view now scrolls as one page
@@ -168,6 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[1.7.3]: https://github.com/xiaolai/insidebar-ai/releases/tag/v1.7.3
 [1.7.0]: https://github.com/xiaolai/insidebar-ai/releases/tag/v1.7.0
 [1.6.0]: https://github.com/xiaolai/insidebar-ai/releases/tag/v1.6.0
 [1.3.0]: https://github.com/xiaolai/insidebar-ai/releases/tag/v1.3.0
