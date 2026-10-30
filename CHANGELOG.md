@@ -5,7 +5,49 @@ All notable changes to insidebar.ai will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.8.5] - 2026-10-30 (Hui fork)
+
+### Changed
+- Send an attached page once per AI conversation; follow-up questions omit page text already shared in that conversation.
+- Remember shared pages when restoring a conversation or switching tabs in Shared research. New conversations and new pages include page text again.
+- Indicate when the attached page has already been shared. Failed or merely prepared submissions do not mark a page as sent.
+
+## [1.8.4] - 2026-10-30 (Hui fork)
+
+### Changed
+- In **Ask about this page**, Enter sends the question and Shift+Enter inserts a new line.
+- Enter used to confirm IME composition does not submit; holding Enter does not send repeatedly.
+
+## [1.8.3] - 2026-10-30 (Hui fork)
+
+### Fixed
+- Tabs left open during an extension update now show a specific refresh message and **Reload and attach** action when their page-reading script is unavailable.
+- Reloading through this action saves the sidebar draft first and restores page attachment when the tab finishes loading.
+
+## [1.8.2] - 2026-10-30 (Hui fork)
+
+### Changed
+- Sidebar visibility now belongs to each browser tab. New tabs start closed; returning to a tab restores its open/closed state.
+- Toolbar, shortcuts and context menus open only the requested tab’s sidebar.
+- Independent panel instances save session changes separately and refresh shared research when shown again.
+
+## [1.8.1] - 2026-10-30 (Hui fork)
+
+### Fixed
+- Local HTML attachments were rejected by the page URL validation even when Chrome file access was already enabled.
+- Page extraction failures now distinguish unsupported page types and empty text, and mention site/file access when extraction cannot run.
+- Page-aware questions use raw extracted text and a filename-only source for local documents, avoiding a full local filesystem path in the source label.
+
+## [1.8.0] - 2026-10-30 (Hui fork)
+
+### Added
+- Independent conversations, question drafts, provider drafts, and Prompt Genie workspaces for each browser tab.
+- Optional shared research conversation across tabs in one window, without merging independent chats.
+- Current-page title chip, remove/reattach controls, and page-aware question submission.
+- Local session restoration of provider conversation addresses and drafts, with origin-checked frame messages.
+- Tab-switch race, failure-preservation, draft isolation, and provider bridge tests.
+
+## [Unreleased upstream changes]
 
 ### Fixed
 - **Prompt Genie Scrolling** (#13): Saved prompts were unreachable on shorter side panels
